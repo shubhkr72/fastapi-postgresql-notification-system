@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import { getNotifications } from '../services/apiService';
 
 const NotificationContext = createContext();
@@ -8,7 +8,7 @@ export const NotificationProvider = ({ children }) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  const loadNotifications = async (userId) => {
+  const loadNotifications = useCallback(async (userId) => {
     if (!userId) return;
     try {
       setLoading(true);
@@ -21,20 +21,22 @@ export const NotificationProvider = ({ children }) => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const addNotification = (notification) => {
+  const addNotification = useCallback((notification) => {
     setNotifications((prev) => [notification, ...prev]);
-  };
+  }, []);
+
+  const value = useMemo(() => ({
+    notifications,
+    loading,
+    error,
+    loadNotifications,
+    addNotification
+  }), [notifications, loading, error, loadNotifications, addNotification]);
 
   return (
-    <NotificationContext.Provider value={{
-      notifications,
-      loading,
-      error,
-      loadNotifications,
-      addNotification
-    }}>
+    <NotificationContext.Provider value={value}>
       {children}
     </NotificationContext.Provider>
   );

@@ -15,6 +15,7 @@ const MainContent = () => {
     loading,
     error,
     loadNotifications,
+    addNotification,
   } = useNotificationContext();
 
   const {
@@ -40,8 +41,8 @@ const MainContent = () => {
       return;
     }
 
-    connect(userId, () => {
-      loadNotifications(userId);
+    connect(userId, (notification) => {
+      addNotification(notification);
     });
 
     return () => {

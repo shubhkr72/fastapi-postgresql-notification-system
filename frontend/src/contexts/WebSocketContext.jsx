@@ -8,7 +8,13 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     return () => {
-      wsRef.current?.close();
+      if (wsRef.current) {
+        wsRef.current.onopen = null;
+        wsRef.current.onmessage = null;
+        wsRef.current.onclose = null;
+        wsRef.current.onerror = null;
+        wsRef.current.close();
+      }
     };
   }, []);
 
@@ -33,11 +39,18 @@ export const WebSocketProvider = ({ children }) => {
     );
   };
 
-  const disconnect = () => {
-    wsRef.current?.close();
-    wsRef.current = null;
+  const disconnect = useCallback(() => {
+    if (wsRef.current) {
+      wsRef.current.onopen = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onclose = null;
+      wsRef.current.onerror = null;
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
     setStatus('disconnected');
-  };
+  }, []);
 
   return (
     <WebSocketContext.Provider value={{ status, connect, disconnect }}>

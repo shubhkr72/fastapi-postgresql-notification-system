@@ -1,5 +1,15 @@
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+const WS_BASE_URL = import.meta.env.VITE_WS_URL || (() => {
+  try {
+    const url = new URL(API_BASE_URL);
+    return `${url.protocol === 'https:' ? 'wss:' : 'ws:'}//${url.host}`;
+  } catch (error) {
+    return 'ws://localhost:8000';
+  }
+})();
+
 export const createWebSocket = (userId, onMessage, onOpen, onClose) => {
-  const ws = new WebSocket(`wss://fastapi-postgresql-notification-system-production.up.railway.app/ws/${userId}`);
+  const ws = new WebSocket(`${WS_BASE_URL}/ws/${userId}`);
 
   ws.onopen = () => {
     console.log('WebSocket connected');
@@ -15,8 +25,8 @@ export const createWebSocket = (userId, onMessage, onOpen, onClose) => {
     }
   };
 
-  ws.onclose = () => {
-    console.log('WebSocket disconnected');
+  ws.onclose = (event) => {
+    console.log('WebSocket disconnected', event.code, event.reason);
     if (onClose) onClose();
   };
 

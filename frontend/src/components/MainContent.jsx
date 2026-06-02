@@ -9,39 +9,47 @@ import ConnectionStatus from './layout/ConnectionStatus';
 
 const MainContent = () => {
   const { userId } = useAuthContext();
-  const { notifications, loading, error, loadNotifications } = useNotificationContext();
-  const { status, connect, disconnect } = useWebSocketContext();
+
+  const {
+    notifications,
+    loading,
+    error,
+    loadNotifications,
+  } = useNotificationContext();
+
+  const {
+    status,
+    connect,
+    disconnect,
+  } = useWebSocketContext();
+
   const [wsConnected, setWsConnected] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
-  // Load notifications when userId changes
+  // Load notifications when user changes
   useEffect(() => {
     if (userId) {
       loadNotifications(userId);
     }
   }, [userId, loadNotifications]);
 
-  // Handle WebSocket connection when userId changes
+  // Connect websocket only when userId changes
   useEffect(() => {
-    if (userId) {
-      connect(userId, (notification) => {
-        // Add new notification to list
-        // Assuming notification context has an addNotification method
-        // For simplicity, we'll just reload notifications
-        loadNotifications(userId);
-      });
-      setWsConnected(status === 'connected');
-    } else {
+    if (!userId) {
       disconnect();
-      setWsConnected(false);
+      return;
     }
+
+    connect(userId, () => {
+      loadNotifications(userId);
+    });
 
     return () => {
       disconnect();
     };
-  }, [userId, status, connect, disconnect, loadNotifications]);
+  }, [userId]);
 
-  // Update connection status
+  // Update UI connection status
   useEffect(() => {
     setWsConnected(status === 'connected');
   }, [status]);
@@ -49,7 +57,9 @@ const MainContent = () => {
   if (!userId) {
     return (
       <div className="min-h-[calc(100vh-16px)] flex flex-col items-center justify-center py-4">
-        <p className="text-gray-500 italic">Please select a user ID to view notifications</p>
+        <p className="text-gray-500 italic">
+          Please select a user ID to view notifications
+        </p>
       </div>
     );
   }
@@ -57,7 +67,11 @@ const MainContent = () => {
   return (
     <main className="flex-1 p-6 max-w-4xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <ConnectionStatus status={status} wsConnected={wsConnected} />
+        <ConnectionStatus
+          status={status}
+          wsConnected={wsConnected}
+        />
+
         <button
           onClick={() => setShowModal(true)}
           className="bg-blue-600 text-white px-4 py-2 rounded-md shadow hover:bg-blue-700 focus:outline-none"
@@ -72,8 +86,14 @@ const MainContent = () => {
         error={error}
       />
 
-      <Modal isOpen={showModal} onClose={() => setShowModal(false)} title="Send Notification">
-        <SendNotificationForm onClose={() => setShowModal(false)} />
+      <Modal
+        isOpen={showModal}
+        onClose={() => setShowModal(false)}
+        title="Send Notification"
+      >
+        <SendNotificationForm
+          onClose={() => setShowModal(false)}
+        />
       </Modal>
     </main>
   );

@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
-import { createWebSocket } from '../services/websocket';
+import { createWebSocket } from '../services/websocketService';
 const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {

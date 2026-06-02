@@ -1,5 +1,6 @@
-import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect, useCallback } from 'react';
 import { createWebSocket } from '../services/websocketService';
+
 const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
@@ -58,14 +59,11 @@ export const WebSocketProvider = ({ children }) => {
     </WebSocketContext.Provider>
   );
 };
+
 export const useWebSocketContext = () => {
   const context = useContext(WebSocketContext);
-
   if (!context) {
-    throw new Error(
-      'useWebSocketContext must be used within a WebSocketProvider'
-    );
+    throw new Error('useWebSocketContext must be used within a WebSocketProvider');
   }
-
   return context;
 };

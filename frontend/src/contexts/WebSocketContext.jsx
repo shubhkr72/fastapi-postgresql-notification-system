@@ -1,4 +1,5 @@
 import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
+import { createWebSocket } from '../services/websocketService';
 
 const WebSocketContext = createContext();
 
@@ -8,7 +9,13 @@ export const WebSocketProvider = ({ children }) => {
 
   useEffect(() => {
     return () => {
-      wsRef.current?.close();
+      if (wsRef.current) {
+        wsRef.current.onopen = null;
+        wsRef.current.onmessage = null;
+        wsRef.current.onclose = null;
+        wsRef.current.onerror = null;
+        wsRef.current.close();
+      }
     };
   }, []);
 
@@ -34,8 +41,15 @@ export const WebSocketProvider = ({ children }) => {
   };
 
   const disconnect = () => {
-    wsRef.current?.close();
-    wsRef.current = null;
+    if (wsRef.current) {
+      wsRef.current.onopen = null;
+      wsRef.current.onmessage = null;
+      wsRef.current.onclose = null;
+      wsRef.current.onerror = null;
+      wsRef.current.close();
+      wsRef.current = null;
+    }
+
     setStatus('disconnected');
   };
 
@@ -44,4 +58,12 @@ export const WebSocketProvider = ({ children }) => {
       {children}
     </WebSocketContext.Provider>
   );
+};
+
+export const useWebSocketContext = () => {
+  const context = useContext(WebSocketContext);
+  if (!context) {
+    throw new Error('useWebSocketContext must be used within a WebSocketProvider');
+  }
+  return context;
 };

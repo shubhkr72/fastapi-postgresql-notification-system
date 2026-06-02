@@ -40,7 +40,7 @@ export const WebSocketProvider = ({ children }) => {
     );
   };
 
-  const disconnect = () => {
+  const disconnect = useCallback(() => {
     if (wsRef.current) {
       wsRef.current.onopen = null;
       wsRef.current.onmessage = null;
@@ -51,7 +51,7 @@ export const WebSocketProvider = ({ children }) => {
     }
 
     setStatus('disconnected');
-  };
+  }, []);
 
   return (
     <WebSocketContext.Provider value={{ status, connect, disconnect }}>

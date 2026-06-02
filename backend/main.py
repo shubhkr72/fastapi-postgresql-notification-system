@@ -73,6 +73,10 @@ async def read_root():
     with open("static/index.html", "r") as f:
         return HTMLResponse(content=f.read())
 
+@app.get("/health")
+async def health_check():
+    return {"status": "ok"}
+
 @app.post("/api/notifications/send", response_model=NotificationResponse)
 async def send_notification(
     payload: NotificationCreate,

@@ -1,38 +1,42 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
-import { createWebSocket } from '../services/websocketService';
+import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 
 const WebSocketContext = createContext();
 
 export const WebSocketProvider = ({ children }) => {
-  const [status, setStatus] = useState('disconnected'); // connected, disconnected, connecting
-  const [ws, setWs] = useState(null);
+  const [status, setStatus] = useState('disconnected');
+  const wsRef = useRef(null);
 
   useEffect(() => {
     return () => {
-      if (ws) {
-        ws.close();
-      }
+      wsRef.current?.close();
     };
-  }, [ws]);
+  }, []);
 
   const connect = (userId, onMessage) => {
     if (!userId) return;
+
+    if (
+      wsRef.current &&
+      (wsRef.current.readyState === WebSocket.OPEN ||
+       wsRef.current.readyState === WebSocket.CONNECTING)
+    ) {
+      return;
+    }
+
     setStatus('connecting');
-    const newWs = createWebSocket(
+
+    wsRef.current = createWebSocket(
       userId,
       onMessage,
       () => setStatus('connected'),
       () => setStatus('disconnected')
     );
-    setWs(newWs);
   };
 
   const disconnect = () => {
-    if (ws) {
-      ws.close();
-      setWs(null);
-      setStatus('disconnected');
-    }
+    wsRef.current?.close();
+    wsRef.current = null;
+    setStatus('disconnected');
   };
 
   return (
@@ -40,12 +44,4 @@ export const WebSocketProvider = ({ children }) => {
       {children}
     </WebSocketContext.Provider>
   );
-};
-
-export const useWebSocketContext = () => {
-  const context = useContext(WebSocketContext);
-  if (!context) {
-    throw new Error('useWebSocketContext must be used within a WebSocketProvider');
-  }
-  return context;
 };

@@ -3,16 +3,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.asyncio import create_async_engine, AsyncSession
 from sqlalchemy.orm import sessionmaker, declarative_base
 
-DATABASE_URL = os.getenv(
-    "DATABASE_URL",
-    "postgresql://localhost/notification_db"
-)
+DATABASE_URL = "postgresql://postgres:555555@localhost/notification_db"
 
-ASYNC_DATABASE_URL = DATABASE_URL.replace(
-    "postgresql://",
-    "postgresql+asyncpg://",
-    1
-)
+ASYNC_DATABASE_URL = "postgresql+asyncpg://postgres:555555@localhost/notification_db"
 
 engine = create_engine(DATABASE_URL)
 
